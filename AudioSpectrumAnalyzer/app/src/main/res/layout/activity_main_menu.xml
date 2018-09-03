@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainMenu"
+    android:background="@drawable/background_0"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".2" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".25"
+            android:layout_margin="5dp"
+            android:text="Audio Spectrum Analyzer"
+            android:textColor="@color/colorText"
+            android:textSize="45dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1" />
+
+        <Button
+            android:id="@+id/buttonGoToRecodingView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight=".2"
+            android:layout_margin="20dp"
+            android:onClick="OpenRecordingWindow"
+            android:text="Start a new recording"
+            android:textSize="25dp"
+            android:drawableRight="@mipmap/ic_launcher_recording_view_icon"
+            android:background="@color/colorText"/>
+
+        <Button
+            android:id="@+id/buttonGoToSpectrumViewerMM"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight=".2"
+            android:layout_margin="20dp"
+            android:onClick="OpenSpectrumViewer"
+            android:text="View Spectrums"
+            android:textSize="25dp"
+            android:drawableRight="@mipmap/ic_launcher_spectrum_view_icon"
+            android:background="@color/colorText"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:layout_gravity="center"
+            android:text="Show Database"
+            android:layout_weight=".2"
+            android:textSize="25dp"
+            android:onClick="OpenDatabaseViewer"
+            android:drawableRight="@mipmap/ic_launcher_database_view_icon"
+            android:background="@color/colorText"
+            />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1" />
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

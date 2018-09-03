@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Audio Spectrum Analyzer</string>
+    <string name="spectrum_view_recording_key">recordKey</string>
+</resources>

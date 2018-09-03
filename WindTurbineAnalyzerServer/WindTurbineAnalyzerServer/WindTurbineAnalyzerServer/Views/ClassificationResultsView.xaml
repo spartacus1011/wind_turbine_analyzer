@@ -1,0 +1,26 @@
+﻿<Window x:Class="WindTurbineAnalyzerServer.ClassificationResultsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WindTurbineAnalyzerServer.ViewModels"
+        mc:Ignorable="d"
+        Title="ClassificationResultsView" Height="600" Width="400">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Classification Result: " FontSize="18" Margin="0,10"></TextBlock>
+            <TextBlock Text="{Binding Result}" FontSize="18" Margin="0,10"></TextBlock>
+
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Wind Percent: "></TextBlock>
+            <TextBlock Text="{Binding WindPercentString}"></TextBlock>
+            <TextBlock Text="   ||||   "></TextBlock>
+            <TextBlock Text="Wind Turbine Percent: "></TextBlock>
+            <TextBlock Text="{Binding WindTurbinePercentString}"></TextBlock>
+        </StackPanel>
+
+        <DataGrid ItemsSource="{Binding ConfidenceScores}" IsReadOnly="True"></DataGrid>
+        
+    </StackPanel>
+</Window>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#001aa7</color>
+    <color name="colorPrimaryDark">#4d4d4d</color>
+    <color name="colorAccent">#adb6c6</color>
+    <color name="colorText">#FFFFFF</color>
+    <color name="colorGraphPoint">#00FF00</color>
+    <color name="colorGraphAxis">#FFFFFF</color>
+    <color name="colorGraphPointMax">#0000FF</color>
+    <color name="colorGraphLineMax">#377be8</color>
+</resources>
