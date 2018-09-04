@@ -97,6 +97,11 @@ public class WavReader {
 
     }
 
+    //MEH
+    public byte[] getByteArrayRaw(){
+        return entireFileData;
+    }
+
     private byte[] convertFileToByteArray(File f)
     {
         byte[] byteArray = null;

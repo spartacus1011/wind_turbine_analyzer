@@ -34,7 +34,11 @@
         <activity
             android:name=".SpectrumView"
             android:screenOrientation="sensorLandscape" />
-        <activity android:name=".ShowDatabaseView"></activity>
+        <activity android:name=".ShowDatabaseView" />
+        <activity
+            android:name=".ClassifyView"
+            android:screenOrientation="sensorPortrait"
+            ></activity>
     </application>
 
 </manifest>

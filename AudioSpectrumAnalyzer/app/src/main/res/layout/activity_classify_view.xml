@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ClassifyView"
+    android:background="@drawable/spectrum_view_background_0"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewFileToSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="File to send"
+            android:textSize="20dp"
+            android:textColor="@color/colorText"
+            android:gravity="center"
+            android:layout_marginVertical="10dp"/>
+
+        <EditText
+            android:id="@+id/editTextRenameFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:foreground="@color/colorText"
+            android:layout_margin="15dp"
+            />
+
+        <Button
+            android:id="@+id/buttonRenameFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change file name"
+            android:onClick="AdjustNameForSending"
+            android:layout_margin="5dp"/>
+
+        <TextView
+            android:id="@+id/textViewStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textColor="@color/colorText"
+            android:layout_margin="10dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_margin="5dp">
+
+            <Button
+                android:id="@+id/buttonSendAsTraining"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="Send audio for training"
+                android:onClick="SendForTraining"/>
+
+            <Button
+                android:id="@+id/buttonSendAsClassify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="Send audio for classification"
+                android:onClick="SendForClassification"/>
+
+        </LinearLayout>
+
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight=".9"
+            android:scrollbars="vertical">
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TableLayout
+                    android:id="@+id/TableClassificationScores"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"></TableLayout>
+
+            </HorizontalScrollView>
+        </ScrollView>
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

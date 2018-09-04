@@ -72,9 +72,6 @@ namespace WindTurbineAnalyzerServer.Tools
             }
         }
 
-        // Incoming data from the client.  
-        public static string data = null;
-
         public delegate void UpdateStatusText(string message);
 
 
@@ -110,26 +107,31 @@ namespace WindTurbineAnalyzerServer.Tools
                     updateStatusText("Waiting for a connection...");
                     // Program is suspended while waiting for an incoming connection.  
                     Socket handler = listener.Accept();
-                    data = null;
                     updateStatusText("Connection recieved. Waiting for data");
                     // An incoming connection needs to be processed.  
-                    
-                    //while (true)
+
+                    List<byte> AllData = new List<byte>(); //Made a list because its easier to have variable size
+                    string tryString = "";
+                    while (true)
                     {
                         int bytesRec = handler.Receive(bytes);
-                        data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                        if (data.IndexOf("<EOF>") > -1) //This somehow looks for the end of the data. Not sure how to make use of it though
-                        {
-                            //should send something back to confirm
+                        
+                        tryString += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+
+                        if (tryString.Contains("<EOF>")) { //I feel like this is a bad idea
                             break;
+                        }
+
+                        for (int i = 0; i < bytesRec; i++) {
+                            AllData.Add(bytes[i]);
                         }
                     }
 
                     // Show the data on the console.  
-                    Console.WriteLine("Text received : {0}", data);
+                    Console.WriteLine("Text received : {0}", tryString);
 
                     // Echo the data back to the client.  
-                    byte[] msg = Encoding.ASCII.GetBytes(data);
+                    byte[] msg = Encoding.ASCII.GetBytes(tryString);
 
                     handler.Send(msg);
                     handler.Shutdown(SocketShutdown.Both);

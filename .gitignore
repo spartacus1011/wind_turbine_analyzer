@@ -303,3 +303,4 @@ AudioSpectrumAnalyzer/.idea/vcs.xml
 AudioSpectrumAnalyzer/.idea/caches/build_file_checksums.ser
 WindTurbineAnalyzerServer/WindTurbineAnalyzerServer/.vs/WindTurbineAnalyzerServer/v15/Server/sqlite3/storage.ide-shm
 AudioSpectrumAnalyzer/.idea/misc.xml
+*.bmp

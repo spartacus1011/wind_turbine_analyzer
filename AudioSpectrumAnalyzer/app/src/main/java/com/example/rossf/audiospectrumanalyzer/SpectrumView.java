@@ -45,13 +45,15 @@ public class SpectrumView extends AppCompatActivity {
 
     private List<RecordedItemInfo> allItems;
 
+    private String currentRecordingID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spectrum_view);
 
         //Testing
-        new TCPSocket().execute();
+
 
         //End Testing
         spinnerSelectableRecording = (Spinner) findViewById(R.id.spinnerSelectableRecordings);
@@ -86,6 +88,7 @@ public class SpectrumView extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 GetWaveData(allItems.get(i).UniqueID);
+                currentRecordingID = allItems.get(i).UniqueID;
             }
 
             @Override
@@ -101,7 +104,7 @@ public class SpectrumView extends AppCompatActivity {
         if (keyToOpen.equals("None")) //using none as a null key is not best practice
         {
             //open/create default spectrum
-            GetWaveData(allItems.get(1).UniqueID);
+            GetWaveData(allItems.get(0).UniqueID);
         } else {
             GetWaveData(keyToOpen);
         }
@@ -161,6 +164,20 @@ public class SpectrumView extends AppCompatActivity {
             currentWaveDataDouble = wav.getByteArrayDouble();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void OpenClassifyView(View view){
+
+        Intent intent = new Intent(this, ClassifyView.class);
+        intent.putExtra(getString(R.string.classify_view_recording_key), currentRecordingID);
+
+        try {
+            startActivity(intent);
+        }
+        catch(Exception e){
+
+
         }
     }
 

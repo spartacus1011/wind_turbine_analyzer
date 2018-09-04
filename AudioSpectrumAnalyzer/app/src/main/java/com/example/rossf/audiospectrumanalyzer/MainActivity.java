@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         // only real way to do this would be to store some rough details in a text file and save it
         // not the worst idea to do for db integrity check
         dbHelper = new DatabaseHelper(this);
+        //dbHelper.DeleteAll(); //RIP
         BaseWorkingDirectory = Environment.getExternalStorageDirectory().getPath() + "/" + getString(R.string.app_name);
         RecordingsDirectory = BaseWorkingDirectory + "/Recordings/";
         context = this.getApplicationContext();

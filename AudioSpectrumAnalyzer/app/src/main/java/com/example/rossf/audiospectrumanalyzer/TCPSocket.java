@@ -6,13 +6,24 @@ import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class TCPSocket extends AsyncTask<Void,Void,Void> {
-
+//Will handle both sending the audio file data and receiving the classification
+public class TCPSocket extends AsyncTask<byte[],Void,Void> {
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Void doInBackground(byte[]... dataToSend) { //uhh what if i dont want these to be params??
+
+        String dataFileInfo;
+        byte[] dataWav;
+        try{
+            dataWav = dataToSend[0];
+            dataFileInfo = new String(dataToSend[1], );
+        }
+        catch(Exception e) {
+            //I need to do something here to show that an error occured with the input params
+            return null;
+        }
         int port = 11000;
-        String ipAddress = "192.168.0.12"; //investgate getting the IP the same way that you do in c#
+        String ipAddress = "10.132.102.36"; //investgate getting the IP the same way that you do in c#
 
         Socket socket;
 
@@ -28,9 +39,19 @@ public class TCPSocket extends AsyncTask<Void,Void,Void> {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataInputStream = new DataInputStream(socket.getInputStream());
 
-            //sending stuffs
-            dataOutputStream.writeUTF(testMessage);
+            //the while loops should have some sort of timeout
 
+            //Sending Part A: File Name
+            String partAAck = "";
+            while (partAAck.contains("A Received")){
+
+                dataOutputStream.writeUTF(dataFileInfo);
+                partAAck = dataInputStream.readUTF();
+            }
+
+            dataOutputStream.write(dataWav);
+
+            dataOutputStream.writeUTF("<EOF>"); //file sending is done
             //String ack = dataInputStream.readUTF();
 
             //who needs to properly close a socket

@@ -38,14 +38,27 @@
                     android:background="@color/colorText"
                     android:layout_margin="5dp"/>
 
+
+
             </LinearLayout>
+
             <Button
                 android:id="@+id/ButtonLoad"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight=".02"
                 android:onClick="LoadOnClick"
-                android:text="Load " />
+                android:text="Load "
+                android:layout_marginVertical="10dp"/>
+
+            <Button
+                android:id="@+id/buttonOpenClassifyView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Classify"
+                android:layout_marginVertical="10dp"
+                android:onClick="OpenClassifyView"
+                />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -58,7 +71,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Maximum Frequency (Hz)"
-                    android:textColor="@color/colorText" />
+                    android:textColor="@color/colorText"
+                    android:textSize="12dp"/>
 
                 <EditText
                     android:id="@+id/editTextMaxFreq"
@@ -71,14 +85,15 @@
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
                     android:text="6000"
-                    android:textSize="15dp" />
+                    android:textSize="12dp" />
 
                 <CheckBox
                     android:id="@+id/checkBoxJoinGraphPoints"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Joing graph points"
-                    android:textColor="@color/colorText" />
+                    android:textColor="@color/colorText"
+                    android:textSize="12dp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -92,7 +107,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Maximum Amplitude"
-                    android:textColor="@color/colorText" />
+                    android:textColor="@color/colorText"
+                    android:textSize="12dp"/>
 
                 <EditText
                     android:id="@+id/editTextMaxAmp"
@@ -105,7 +121,7 @@
                     android:selectAllOnFocus="true"
                     android:singleLine="true"
                     android:text="5000"
-                    android:textSize="15dp" />
+                    android:textSize="12dp" />
             </LinearLayout>
 
 
