@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -111,14 +112,31 @@ namespace WindTurbineAnalyzerServer.Tools
                     // An incoming connection needs to be processed.  
 
                     List<byte> AllData = new List<byte>(); //Made a list because its easier to have variable size
+                    string fileInfo = "";
                     string tryString = "";
+
+                    //Receiving part A
+                    //while (true)
+                    {
+                        int bytesCountA = handler.Receive(bytes);
+                        fileInfo += Encoding.UTF8.GetString(bytes, 0, bytesCountA);
+
+                        //if (fileInfo.Contains("\u0004")) //this means end of transmition. I think??
+                            //break;
+                    }
+                    fileInfo = fileInfo.Replace("\u0005",""); //removing the EOF tag
+                    fileInfo = fileInfo.Replace("\0","");
+                    fileInfo = fileInfo.Replace("$",""); //Not sure where this $ comes from
+
+                    fileInfo = Path.GetInvalidFileNameChars().Aggregate(fileInfo, (current, c) => current.Replace(c.ToString(), string.Empty)); // force remove any invalid chars
+                    //Receiving part B
+                    handler = listener.Accept();
                     while (true)
                     {
                         int bytesRec = handler.Receive(bytes);
-                        
-                        tryString += Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-                        if (tryString.Contains("<EOF>")) { //I feel like this is a bad idea
+                        tryString += Encoding.ASCII.GetString(bytes, 0, bytesRec); //I feel like this is a bad idea
+                        if (tryString.Contains("<EOF>")) { 
                             break;
                         }
 
@@ -127,13 +145,8 @@ namespace WindTurbineAnalyzerServer.Tools
                         }
                     }
 
-                    // Show the data on the console.  
-                    Console.WriteLine("Text received : {0}", tryString);
+                    File.WriteAllBytes("ReceivedAudio\\" + fileInfo + ".wav", AllData.ToArray());
 
-                    // Echo the data back to the client.  
-                    byte[] msg = Encoding.ASCII.GetBytes(tryString);
-
-                    handler.Send(msg);
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
                 }

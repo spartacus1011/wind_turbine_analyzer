@@ -41,9 +41,11 @@ public class ClassifyView extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if(rawWavData != null && rawWavData.length > 0)
-            new TCPSocket().execute(rawWavData,);
+            new TCPSendAudioData().execute(rawWavData, (textViewFileToSend.getText().toString().getBytes()));
+
+
     }
 
     public void SendForClassification(View view) {

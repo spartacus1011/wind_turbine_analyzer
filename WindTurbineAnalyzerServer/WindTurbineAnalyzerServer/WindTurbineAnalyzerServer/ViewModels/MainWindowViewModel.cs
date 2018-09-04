@@ -44,6 +44,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
             //Consider showing a splash or something while this is happening
             //set up matlab
 
+            
             matlab.Execute(@"cd D:\RMITUNI\allwindturbineanalyzer\WindTurbineAnalyser"); //everything will be done from this directory
 
             if (Directory.Exists("ReceivedAudio") && Directory.GetFiles("ReceivedAudio").Length > 0)
