@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Net;
 
 namespace WindTurbineAnalyzerServer.ViewModels
 {
@@ -33,6 +34,10 @@ namespace WindTurbineAnalyzerServer.ViewModels
         private string selectedAudioFile = "";
         public string SelectedAudioFile { get { return selectedAudioFile; } set { selectedAudioFile = value; RaisePropertyChangedEvent("SelectedAudioFile"); RaisePropertyChangedEvent("HasAudioToClassify"); } }
 
+        public string IPAddress{ get; set; } //its ok to not have the private one as the IP address wont change between sessions
+
+        private int sessionReceivedCount = 0; 
+        public string SessionReceivedCountString { get { return "Files receiced this session: " + sessionReceivedCount; } }
 
         private TCPSocketSyncronous tcp = new TCPSocketSyncronous(); //we only really want one TCP connection at a time
         MLApp.MLApp matlab = new MLApp.MLApp();
@@ -42,21 +47,16 @@ namespace WindTurbineAnalyzerServer.ViewModels
         {
             SelectedAudioFile = "";
             //Consider showing a splash or something while this is happening
-            //set up matlab
 
-            
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress ipAddress = ipHostInfo.AddressList[1];
+
+            IPAddress = ipAddress.ToString();
+            //set up matlab
             matlab.Execute(@"cd D:\RMITUNI\allwindturbineanalyzer\WindTurbineAnalyser"); //everything will be done from this directory
 
-            if (Directory.Exists("ReceivedAudio") && Directory.GetFiles("ReceivedAudio").Length > 0)
-            {
-                audioFiles = Directory.GetFiles("ReceivedAudio").ToList();
-            }
-            else
-            {
-                Directory.CreateDirectory("ReceivedAudio");
-                audioFiles.Add("The received audio directory could not be found or there were no files in the directory");
+            populateReceivedList();
 
-            }
         }
 
         public void UpdateStatusText(string message) {
@@ -72,12 +72,16 @@ namespace WindTurbineAnalyzerServer.ViewModels
                 asyncListen.Start(); //Need to google how to give the task a callback function
                 TCPisInactive = false;
             }
+
         }
 
         private void startTCPListeningAction()
         { 
             tcp.StartListening(UpdateStatusText);
             TCPisInactive = true; //this might need to be moved
+            populateReceivedList();
+            sessionReceivedCount++;
+            RaisePropertyChangedEvent("SessionReceivedCountString");
         }
 
 
@@ -138,6 +142,20 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
             }
             object[] res = result as object[];
+        }
+
+        private void populateReceivedList()
+        {
+            if (Directory.Exists("ReceivedAudio") && Directory.GetFiles("ReceivedAudio").Length > 0)
+            {
+                audioFiles = Directory.GetFiles("ReceivedAudio").ToList();
+            }
+            else
+            {
+                Directory.CreateDirectory("ReceivedAudio");
+                audioFiles.Add("The received audio directory could not be found or there were no files in the directory");
+            }
+            RaisePropertyChangedEvent("AudioFiles");
         }
     }
 }

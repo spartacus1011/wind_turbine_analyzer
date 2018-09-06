@@ -12,20 +12,25 @@
         <viewModels:MainWindowViewModel/>
     </Window.DataContext>
 
-    <StackPanel>
-        <TextBlock Text="Wind Turbine Analyzer Server" FontSize="30" HorizontalAlignment="Center" Margin="10,10"></TextBlock>
-        <StackPanel Orientation="Horizontal">
+    <DockPanel>
+        <TextBlock Text="Wind Turbine Analyzer Server" FontSize="30" HorizontalAlignment="Center" Margin="10,10" DockPanel.Dock="Top"></TextBlock>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <TextBlock Text="Current Status:" FontSize="20" Margin="10,10"></TextBlock>
             <TextBlock Text="{Binding StatusText}" FontSize="20" Margin="10,10"></TextBlock>
         </StackPanel>
-        <Button Command="{Binding StartTCPListeningCommand}" IsEnabled="{Binding TCPisInactive}" Content="Start listening for an audio file" HorizontalAlignment="Left" Margin="10,10"></Button>
-        <Button Command="{Binding StartTrainingCommand}" IsEnabled="{Binding NetworkIsTraining}" Content="Re-Train Network" HorizontalAlignment="Left" Margin="10,10"></Button>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            <Button Command="{Binding StartTCPListeningCommand}" IsEnabled="{Binding TCPisInactive}" Content="Start listening for an audio file" HorizontalAlignment="Left" Margin="10,10"></Button>
+            <TextBlock Text="{Binding SessionReceivedCountString}"></TextBlock>
+        </StackPanel>
+        <Button Command="{Binding StartTrainingCommand}" IsEnabled="{Binding NetworkIsTraining}" Content="Re-Train Network" HorizontalAlignment="Left" Margin="10,10" DockPanel.Dock="Top"></Button>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <Button Command="{Binding CreateClassificationImagesCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Classify selected file" HorizontalAlignment="Left" Margin="10,10"></Button>
             <ListView ItemsSource="{Binding AudioFiles}" HorizontalAlignment="Stretch" SelectedItem="{Binding SelectedAudioFile}">
                 
             </ListView>
         </StackPanel>
-        <Button Command="{Binding ClassifyCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Classify Images" HorizontalAlignment="Left" Margin="10,10"></Button>
-    </StackPanel>
+        <Button Command="{Binding ClassifyCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Classify Images" HorizontalAlignment="Left" Margin="10,10" DockPanel.Dock="Top"></Button>
+        <Grid DockPanel.Dock="Top"></Grid> <!-- just so that the last item doesnt fill -->
+        <TextBlock Text="{Binding IPAddress}" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Margin="10,10"></TextBlock>
+    </DockPanel>
 </Window>

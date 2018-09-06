@@ -21,11 +21,14 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
     @Override
     protected Void doInBackground(byte[]... dataToSend) { //uhh what if i dont want these to be params??
 
+        String dataPurose; //either classification or training
         String dataFileInfo;
         byte[] dataWav;
         try{
             dataWav = dataToSend[0];
             dataFileInfo = new String(dataToSend[1]);
+            dataPurose = new String(dataToSend[2]);
+            dataPurose += "|Wind";
         }
         catch(Exception e) {
             //I need to do something here to show that an error occured with the input params
@@ -45,30 +48,40 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
             socket = new Socket(serverAddress, port); //This is where the initial connection is made
 
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            dataInputStream = new DataInputStream(socket.getInputStream());
+            dataInputStream = new DataInputStream(socket.getInputStream()); //pretty sure in input serves no purpose here
 
-            //the while loops should have some sort of timeout
+            //Sending Part A: Purpose
+            byte[] purposeBytes = dataPurose.getBytes("UTF-8");
+            purposeBytes = Arrays.copyOf(purposeBytes, 1024); //This should do the padding
 
-            //Sending Part A: File Name
-            byte[] textData = dataFileInfo.getBytes("UTF-8");
-            textData = Arrays.copyOf(textData, 1024); //This should do the padding
-
-            dataOutputStream.write(textData);
-
+            dataOutputStream.write(purposeBytes);
             dataOutputStream.close();
-            //Sending Part B:Wav file
+
+
+            //Sending Part B: File Name
+            socket = new Socket(serverAddress, port); //This is where the initial connection is made
+            dataOutputStream = new DataOutputStream(socket.getOutputStream());
+
+            byte[] fileInfoBytes = dataFileInfo.getBytes("UTF-8");
+            fileInfoBytes = Arrays.copyOf(fileInfoBytes, 1024); //This should do the padding
+
+            dataOutputStream.write(fileInfoBytes);
+            dataOutputStream.close();
+
+            //Sending Part C:Wav file
             socket = new Socket(serverAddress, port); //Not keen on this, but it looks to be the only solution
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
+
             dataOutputStream.write(dataWav);
 
             dataOutputStream.writeUTF("<EOF>"); //file sending is done
 
             //who needs to properly close a socket
+
             dataInputStream.close();
             dataOutputStream.close();
             socket.close();
         } catch (Exception e) {
-            //mkmsg("Error happened sending/receiving\n");
             System.out.printf(e.getMessage());
 
         } finally {

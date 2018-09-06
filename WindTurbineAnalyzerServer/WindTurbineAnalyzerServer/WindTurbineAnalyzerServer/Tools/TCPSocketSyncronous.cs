@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace WindTurbineAnalyzerServer.Tools
 {
+    //not even syncronous anymore
     public class TCPSocketSyncronous
     {
         public void StartClient()
@@ -102,7 +103,7 @@ namespace WindTurbineAnalyzerServer.Tools
                 listener.Listen(10);
 
                 // Start listening for connections.  
-                while (true)
+                //while (true)
                 {
                     //Console.WriteLine("Waiting for a connection...");
                     updateStatusText("Waiting for a connection...");
@@ -112,24 +113,38 @@ namespace WindTurbineAnalyzerServer.Tools
                     // An incoming connection needs to be processed.  
 
                     List<byte> AllData = new List<byte>(); //Made a list because its easier to have variable size
+                    string purposeAndLayer = "";
                     string fileInfo = "";
                     string tryString = "";
 
                     //Receiving part A
-                    //while (true)
-                    {
-                        int bytesCountA = handler.Receive(bytes);
-                        fileInfo += Encoding.UTF8.GetString(bytes, 0, bytesCountA);
+                    int bytesCountA = handler.Receive(bytes);
+                    purposeAndLayer += Encoding.UTF8.GetString(bytes, 0, bytesCountA);
 
-                        //if (fileInfo.Contains("\u0004")) //this means end of transmition. I think??
-                            //break;
-                    }
+                    purposeAndLayer = purposeAndLayer.Replace("\u0005", ""); //removing the EOF tag
+                    purposeAndLayer = purposeAndLayer.Replace("\0", ""); //removing padding bytes
+                    purposeAndLayer = purposeAndLayer.Replace("$", ""); //Not sure where this $ comes from
+
+                    string[] purposeAndLayerSplit = purposeAndLayer.Split('|');
+                    string purpose = purposeAndLayerSplit[0];
+                    string layer = "";
+                    if (purpose == "Training")
+                        layer = purposeAndLayerSplit[1];
+
+                    updateStatusText("Received part A, Awaiting part B");
+                    //Receiving part B
+                    handler = listener.Accept();
+                    int bytesCountB = handler.Receive(bytes);
+                    fileInfo += Encoding.UTF8.GetString(bytes, 0, bytesCountB);
+
                     fileInfo = fileInfo.Replace("\u0005",""); //removing the EOF tag
                     fileInfo = fileInfo.Replace("\0","");
                     fileInfo = fileInfo.Replace("$",""); //Not sure where this $ comes from
 
                     fileInfo = Path.GetInvalidFileNameChars().Aggregate(fileInfo, (current, c) => current.Replace(c.ToString(), string.Empty)); // force remove any invalid chars
-                    //Receiving part B
+
+                    updateStatusText("Received part B, Awaiting part C");
+                    //Receiving part C
                     handler = listener.Accept();
                     while (true)
                     {
@@ -145,10 +160,29 @@ namespace WindTurbineAnalyzerServer.Tools
                         }
                     }
 
-                    File.WriteAllBytes("ReceivedAudio\\" + fileInfo + ".wav", AllData.ToArray());
+                    if (purpose == "Classification")
+                    {
+                        File.WriteAllBytes("ReceivedAudio\\" + fileInfo + ".wav", AllData.ToArray());
+                        //we might want to do something extra here
+                    }
+                    else if (purpose == "Training")
+                    {
+                        string dir = "DownloadedAudio\\" + layer;
+                        if (!Directory.Exists(dir))
+                            Directory.CreateDirectory(dir);
+                        File.WriteAllBytes(String.Format("{0}\\{1}.wav", dir, fileInfo), AllData.ToArray());
+
+                    }
+                    else {
+                        //We have a problem
+                        throw new Exception("Error: incorrect data purpose");
+                    }
 
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
+                    listener.Close();
+
+                    updateStatusText(string.Format("A new {0} file has been downloaded", purpose));
                 }
 
             }

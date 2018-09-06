@@ -43,14 +43,23 @@ public class ClassifyView extends AppCompatActivity {
         }
 
         if(rawWavData != null && rawWavData.length > 0)
-            new TCPSendAudioData().execute(rawWavData, (textViewFileToSend.getText().toString().getBytes()));
-
+            new TCPSendAudioData().execute(rawWavData, (textViewFileToSend.getText().toString().getBytes()), "Training".getBytes());
 
     }
 
     public void SendForClassification(View view) {
 
+        byte[] rawWavData = new byte[0];
 
+        try {
+            WavReader wav = new WavReader(MainActivity.RecordingsDirectory + originalID + ".wav", true);
+            rawWavData = wav.getByteArrayRaw();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(rawWavData != null && rawWavData.length > 0)
+            new TCPSendAudioData().execute(rawWavData, (textViewFileToSend.getText().toString().getBytes()), "Classification".getBytes());
 
     }
 

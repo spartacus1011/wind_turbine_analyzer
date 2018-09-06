@@ -52,10 +52,6 @@ public class SpectrumView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spectrum_view);
 
-        //Testing
-
-
-        //End Testing
         spinnerSelectableRecording = (Spinner) findViewById(R.id.spinnerSelectableRecordings);
         graph = (ImageView) findViewById(R.id.imageViewSpectrum);
         editTextMaxAmp = (EditText) findViewById(R.id.editTextMaxAmp);

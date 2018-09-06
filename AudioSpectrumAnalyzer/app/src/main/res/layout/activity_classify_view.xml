@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            android:foreground="@color/colorText"
+            android:background="@color/colorText"
             android:layout_margin="15dp"
             />
 
