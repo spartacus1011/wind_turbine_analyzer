@@ -28,15 +28,15 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
             dataWav = dataToSend[0];
             dataFileInfo = new String(dataToSend[1]);
             dataPurose = new String(dataToSend[2]);
-            dataPurose += "|Wind";
         }
         catch(Exception e) {
             //I need to do something here to show that an error occured with the input params
             return null;
         }
         int port = 11000;
-        //String ipAddress = getIPAddress(true);
-        String ipAddress = "192.168.0.12"; //Should make this an enterable parameter
+
+        String myipAddress = getIPAddress(true);
+        String ipAddress = "192.168.0.10"; //Should make this an enterable parameter
 
         Socket socket;
 

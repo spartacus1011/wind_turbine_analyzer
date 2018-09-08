@@ -12,100 +12,30 @@ namespace WindTurbineAnalyzerServer.Tools
     //not even syncronous anymore
     public class TCPSocketSyncronous
     {
-        public void StartClient()
-        {
-            // Data buffer for incoming data.  
-            byte[] bytes = new byte[1024];
-
-            // Connect to a remote device.  
-            try
-            {
-                // Establish the remote endpoint for the socket.  
-                // This example uses port 11000 on the local computer.  
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                IPAddress ipAddress = ipHostInfo.AddressList[0];
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
-
-                // Create a TCP/IP  socket.  
-                Socket sender = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
-
-                // Connect the socket to the remote endpoint. Catch any errors.  
-                try
-                {
-                    sender.Connect(remoteEP);
-
-                    Console.WriteLine("Socket connected to {0}",
-                        sender.RemoteEndPoint.ToString());
-
-                    // Encode the data string into a byte array.  
-                    byte[] msg = Encoding.ASCII.GetBytes("This is a test<EOF>");
-
-                    // Send the data through the socket.  
-                    int bytesSent = sender.Send(msg);
-
-                    // Receive the response from the remote device.  
-                    int bytesRec = sender.Receive(bytes);
-                    Console.WriteLine("Echoed test = {0}",
-                        Encoding.ASCII.GetString(bytes, 0, bytesRec));
-
-                    // Release the socket.  
-                    sender.Shutdown(SocketShutdown.Both);
-                    sender.Close();
-
-                }
-                catch (ArgumentNullException ane)
-                {
-                    Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
-                }
-                catch (SocketException se)
-                {
-                    Console.WriteLine("SocketException : {0}", se.ToString());
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Unexpected exception : {0}", e.ToString());
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
         public delegate void UpdateStatusText(string message);
 
-
         //should probs rename this
-        public void StartListening(UpdateStatusText updateStatusText)
+        public bool? StartListening(UpdateStatusText updateStatusText, out string imagePath)
         {
-            updateStatusText("Setting up");
-            // Data buffer for incoming data.  
+            imagePath = "";
+            updateStatusText("Setting up for listening");
+
             byte[] bytes = new Byte[1024];
 
-            // Establish the local endpoint for the socket.  
-            // Dns.GetHostName returns the name of the   
-            // host running the application.  
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[1];
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
 
-            // Create a TCP/IP socket.  
-            Socket listener = new Socket(ipAddress.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
+            Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            // Bind the socket to the local endpoint and   
-            // listen for incoming connections.  
             try
             {
                 listener.Bind(localEndPoint);
                 listener.Listen(10);
 
                 // Start listening for connections.  
-                //while (true)
+                //while (true) //use this for final server when you want it to constantly be waiting for a new connection
                 {
-                    //Console.WriteLine("Waiting for a connection...");
                     updateStatusText("Waiting for a connection...");
                     // Program is suspended while waiting for an incoming connection.  
                     Socket handler = listener.Accept();
@@ -137,9 +67,9 @@ namespace WindTurbineAnalyzerServer.Tools
                     int bytesCountB = handler.Receive(bytes);
                     fileInfo += Encoding.UTF8.GetString(bytes, 0, bytesCountB);
 
-                    fileInfo = fileInfo.Replace("\u0005",""); //removing the EOF tag
-                    fileInfo = fileInfo.Replace("\0","");
-                    fileInfo = fileInfo.Replace("$",""); //Not sure where this $ comes from
+                    fileInfo = fileInfo.Replace("\u0005", ""); //removing the EOF tag
+                    fileInfo = fileInfo.Replace("\0", "");
+                    fileInfo = fileInfo.Replace("$", ""); //Not sure where this $ comes from
 
                     fileInfo = Path.GetInvalidFileNameChars().Aggregate(fileInfo, (current, c) => current.Replace(c.ToString(), string.Empty)); // force remove any invalid chars
 
@@ -151,19 +81,23 @@ namespace WindTurbineAnalyzerServer.Tools
                         int bytesRec = handler.Receive(bytes);
 
                         tryString += Encoding.ASCII.GetString(bytes, 0, bytesRec); //I feel like this is a bad idea
-                        if (tryString.Contains("<EOF>")) { 
+                        if (tryString.Contains("<EOF>"))
+                        {
                             break;
                         }
 
-                        for (int i = 0; i < bytesRec; i++) {
+                        for (int i = 0; i < bytesRec; i++)
+                        {
                             AllData.Add(bytes[i]);
                         }
                     }
 
                     if (purpose == "Classification")
                     {
-                        File.WriteAllBytes("ReceivedAudio\\" + fileInfo + ".wav", AllData.ToArray());
-                        //we might want to do something extra here
+                        imagePath = "ReceivedAudio\\" + fileInfo + ".wav";
+                        File.WriteAllBytes(imagePath, AllData.ToArray());
+
+
                     }
                     else if (purpose == "Training")
                     {
@@ -173,7 +107,8 @@ namespace WindTurbineAnalyzerServer.Tools
                         File.WriteAllBytes(String.Format("{0}\\{1}.wav", dir, fileInfo), AllData.ToArray());
 
                     }
-                    else {
+                    else
+                    {
                         //We have a problem
                         throw new Exception("Error: incorrect data purpose");
                     }
@@ -183,16 +118,67 @@ namespace WindTurbineAnalyzerServer.Tools
                     listener.Close();
 
                     updateStatusText(string.Format("A new {0} file has been downloaded", purpose));
+                    return purpose == "Classification";
                 }
-
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                updateStatusText(e.ToString());
+                listener.Close();
+                return null;
             }
         }
 
 
+        public bool SendClassificationResults(UpdateStatusText updateStatusText, string classificationResult, string[] classificationPercentages)
+        {
+            updateStatusText("Setting up for sending");
+
+            byte[] bytes = new Byte[1024];
+
+            //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress ipAddress = new IPAddress(new byte[] { 192,168,0,9});
+
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
+
+            Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+            try
+            {
+                //sender.Bind(localEndPoint);
+
+                updateStatusText("Sending data");
+
+                sender.Connect(localEndPoint); //will wait here until phone accepts socket connection
+
+
+                //data should be sent in parts (or all as one string). Im sure that there are better ways to do this, but this will do
+                // *Classification result*|*Wind percentage*, Wind turbine percentage|*Any other future data*
+                string percentagesToSend = "";
+                foreach (string percent in classificationPercentages)
+                {
+                    percentagesToSend += percent + ",";
+                }
+
+                percentagesToSend.Remove(percentagesToSend.Length); //nasty but efficent way to get rid of the final comma
+
+                string toSend = String.Format("{0}|{1}",classificationResult,percentagesToSend);
+
+                sender.Send(Encoding.UTF8.GetBytes(toSend));
+
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
+            }
+
+            catch (Exception e)
+            {
+                updateStatusText(e.ToString());
+                sender.Close();
+                return false;
+            }
+
+            return true;
+        }
 
     }
 }

@@ -41,13 +41,28 @@
             android:onClick="AdjustNameForSending"
             android:layout_margin="5dp"/>
 
-        <TextView
-            android:id="@+id/textViewStatus"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status"
-            android:textColor="@color/colorText"
-            android:layout_margin="10dp"/>
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spinnerSelectableLayers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorText"></Spinner>
+
+            <TextView
+                android:id="@+id/textViewStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status. I dont thing this is doing anything"
+                android:textColor="@color/colorText"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
+
+
 
         <LinearLayout
             android:layout_width="match_parent"

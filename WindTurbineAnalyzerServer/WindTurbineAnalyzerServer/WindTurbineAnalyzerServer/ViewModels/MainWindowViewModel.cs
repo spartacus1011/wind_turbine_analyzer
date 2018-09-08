@@ -17,9 +17,9 @@ namespace WindTurbineAnalyzerServer.ViewModels
     public class MainWindowViewModel : ObservableObject
     {
         public ICommand StartTCPListeningCommand { get { return new DelegateCommand(startTCPListening); } }
-        public ICommand CreateClassificationImagesCommand { get { return new DelegateCommand(createClassificationImages); } }
-        public ICommand StartTrainingCommand { get { return new DelegateCommand(startTrainingNetwork); } }
-        public ICommand ClassifyCommand { get { return new DelegateCommand(classify); } }
+        public ICommand CreateClassificationImagesCommand { get { return new DelegateCommand(CreateClassificationImages); } }
+        public ICommand StartTrainingCommand { get { return new DelegateCommand(StartTrainingNetwork); } }
+        public ICommand ClassifyCommand { get { return new DelegateCommand(Classify); } }
 
         private string statusText = "Good morning";
         public string StatusText { get { return statusText; } set { statusText = value; RaisePropertyChangedEvent("StatusText"); } }
@@ -50,12 +50,12 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[1];
-
             IPAddress = ipAddress.ToString();
+            
             //set up matlab
             matlab.Execute(@"cd D:\RMITUNI\allwindturbineanalyzer\WindTurbineAnalyser"); //everything will be done from this directory
 
-            populateReceivedList();
+            PopulateReceivedList();
 
         }
 
@@ -68,20 +68,44 @@ namespace WindTurbineAnalyzerServer.ViewModels
         {
             if (TCPisInactive)
             {
-                Task asyncListen = new Task(startTCPListeningAction);
+
+                Task<bool?> asyncListen = new Task<bool?>(startTCPListeningAction);
                 asyncListen.Start(); //Need to google how to give the task a callback function
+
+                asyncListen.Wait();
+
+                bool? classify = asyncListen.Result;
+
+                if (classify == true)
+                {
+                    CreateClassificationImages(pathForClassification, "Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
+
+                    //we then need to classify images 
+                    Classify("Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
+
+                    tcp.SendClassificationResults(UpdateStatusText, "", new string[] { "", "" });
+                    //and send the results back
+                }
+                //if false we chill the data was just for training, if null there was an error
+
+
                 TCPisInactive = false;
             }
-
         }
 
-        private void startTCPListeningAction()
+        private string pathForClassification;
+
+        private bool? startTCPListeningAction()
         { 
-            tcp.StartListening(UpdateStatusText);
+            bool? classify = tcp.StartListening(UpdateStatusText, out string path);
+            pathForClassification = path;
             TCPisInactive = true; //this might need to be moved
-            populateReceivedList();
+            PopulateReceivedList();
             sessionReceivedCount++;
             RaisePropertyChangedEvent("SessionReceivedCountString");
+
+            return classify;
+ 
         }
 
 
@@ -89,30 +113,36 @@ namespace WindTurbineAnalyzerServer.ViewModels
         private int noverlap = 500;
         private int nfft = 1024;
 
-        private void createClassificationImages() {
-
-            object result = null;
+        private void CreateClassificationImages() {
             string outputImageLocation = "Classification//" + Path.GetFileNameWithoutExtension(selectedAudioFile);
+            CreateClassificationImages(selectedAudioFile,outputImageLocation);
+        }
+
+        private void CreateClassificationImages(string pathToAudio,string pathToOutputImages)
+        {
+            StatusText = "Creating classification images...";
+            object result = null;
             try
             {
-                Directory.CreateDirectory(outputImageLocation);
-                matlab.Feval("CreateClassificationImages", 1, out result, selectedAudioFile, outputImageLocation, window, noverlap, nfft);
+                Directory.CreateDirectory(pathToOutputImages);
+                matlab.Feval("CreateClassificationImages", 1, out result, pathToAudio, pathToOutputImages, window, noverlap, nfft);
             }
-            catch (Exception e) {
-                Console.WriteLine("Output file location = " + outputImageLocation);
+            catch (Exception e)
+            {
+                Console.WriteLine("Output file location = " + pathToOutputImages);
                 StatusText = "An error has occured whilst trying to classify the images: \n" + e.Message;
 
             }
             object[] res = result as object[];
-
+            StatusText = "Classification images have been created in path: " + pathToOutputImages;
         }
 
-        private void classify() {
+        private void Classify(string selectedAudioPath) {
 
             object result = null;
             try
             {
-                matlab.Feval("Classify", 4, out result, "Classification//" + Path.GetFileNameWithoutExtension(selectedAudioFile));
+                matlab.Feval("Classify", 4, out result, selectedAudioPath);
             }
             catch (Exception e)
             {
@@ -121,15 +151,26 @@ namespace WindTurbineAnalyzerServer.ViewModels
             }
             object[] res = result as object[];
 
+
+            CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (float[,])res[3]);
+        }
+
+        private void CreateClassificationResultsView(string result, double windPercent, double windTurbinePercent, float[,] confidenceScores)
+        {
             //its ok to do stuff in this manner it will only be a one way interaction between the views
             ClassificationResultsView classificationResultsView = new ClassificationResultsView();
-            classificationResultsView.DataContext = new ClassificationResultsViewModel((string)res[0], (double)res[1], (double)res[2], (float[,])res[3]);
+            classificationResultsView.DataContext = new ClassificationResultsViewModel(result, windPercent, windTurbinePercent, confidenceScores);
 
             classificationResultsView.Show(); //This is in a new thread
         }
 
+        private void Classify() {
 
-        private void startTrainingNetwork() {
+            Classify("Classification//" + Path.GetFileNameWithoutExtension(selectedAudioFile));
+        }
+
+
+        private void StartTrainingNetwork() {
 
             object result = null;
             try
@@ -144,7 +185,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
             object[] res = result as object[];
         }
 
-        private void populateReceivedList()
+        private void PopulateReceivedList()
         {
             if (Directory.Exists("ReceivedAudio") && Directory.GetFiles("ReceivedAudio").Length > 0)
             {
