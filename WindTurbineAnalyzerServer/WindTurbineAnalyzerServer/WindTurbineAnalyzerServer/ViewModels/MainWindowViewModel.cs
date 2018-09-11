@@ -11,6 +11,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
+using System.Windows.Threading;
 
 namespace WindTurbineAnalyzerServer.ViewModels
 {
@@ -69,27 +70,11 @@ namespace WindTurbineAnalyzerServer.ViewModels
             if (TCPisInactive)
             {
 
-                Task<bool?> asyncListen = new Task<bool?>(startTCPListeningAction);
-                asyncListen.Start(); //Need to google how to give the task a callback function
+                //Task<bool?> asyncListen = new Task<bool?>(startTCPListeningAction);
+                //asyncListen.Start(); //Need to google how to give the task a callback function
 
-                asyncListen.Wait();
-
-                bool? classify = asyncListen.Result;
-
-                if (classify == true)
-                {
-                    CreateClassificationImages(pathForClassification, "Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
-
-                    //we then need to classify images 
-                    Classify("Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
-
-                    tcp.SendClassificationResults(UpdateStatusText, "", new string[] { "", "" });
-                    //and send the results back
-                }
-                //if false we chill the data was just for training, if null there was an error
-
-
-                TCPisInactive = false;
+                StartSTATask(startTCPListeningAction);
+                
             }
         }
 
@@ -99,13 +84,27 @@ namespace WindTurbineAnalyzerServer.ViewModels
         { 
             bool? classify = tcp.StartListening(UpdateStatusText, out string path);
             pathForClassification = path;
-            TCPisInactive = true; //this might need to be moved
+            TCPisInactive = false; //this might need to be moved
             PopulateReceivedList();
             sessionReceivedCount++;
             RaisePropertyChangedEvent("SessionReceivedCountString");
 
+            if (classify == true)
+            {
+                CreateClassificationImages(pathForClassification, "Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
+
+                //we then need to classify images 
+                object[] result = Classify("Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
+
+                tcp.SendClassificationResults(UpdateStatusText, result[0].ToString(), new string[] { result[1].ToString(), result[2].ToString() });
+                //and send the results back
+            }
+            //if false we chill the data was just for training, if null there was an error
+
+
+            TCPisInactive = true;
+
             return classify;
- 
         }
 
 
@@ -137,7 +136,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
             StatusText = "Classification images have been created in path: " + pathToOutputImages;
         }
 
-        private void Classify(string selectedAudioPath) {
+        private object[] Classify(string selectedAudioPath) {
 
             object result = null;
             try
@@ -151,8 +150,11 @@ namespace WindTurbineAnalyzerServer.ViewModels
             }
             object[] res = result as object[];
 
-
-            CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (float[,])res[3]);
+            if (res != null)
+            {
+                CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (float[,])res[3]);
+            }
+            return res;
         }
 
         private void CreateClassificationResultsView(string result, double windPercent, double windTurbinePercent, float[,] confidenceScores)
@@ -162,6 +164,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
             classificationResultsView.DataContext = new ClassificationResultsViewModel(result, windPercent, windTurbinePercent, confidenceScores);
 
             classificationResultsView.Show(); //This is in a new thread
+            
         }
 
         private void Classify() {
@@ -198,5 +201,26 @@ namespace WindTurbineAnalyzerServer.ViewModels
             }
             RaisePropertyChangedEvent("AudioFiles");
         }
+
+        private static Task<T> StartSTATask<T>(Func<T> func)
+        {
+            var tcs = new TaskCompletionSource<T>();
+            Thread thread = new Thread(() =>
+            {
+                try
+                {
+                    tcs.SetResult(func());
+                    Dispatcher.Run(); //this basically just pauses everything. Take care with this
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            return tcs.Task;
+        }
+
     }
 }

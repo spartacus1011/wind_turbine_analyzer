@@ -136,8 +136,7 @@ namespace WindTurbineAnalyzerServer.Tools
 
             byte[] bytes = new Byte[1024];
 
-            //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = new IPAddress(new byte[] { 192,168,0,9});
+            IPAddress ipAddress = new IPAddress(new byte[] { 10,132,157,227});
 
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
 
@@ -160,9 +159,9 @@ namespace WindTurbineAnalyzerServer.Tools
                     percentagesToSend += percent + ",";
                 }
 
-                percentagesToSend.Remove(percentagesToSend.Length); //nasty but efficent way to get rid of the final comma
+                percentagesToSend.Remove(percentagesToSend.Length -1); //nasty but efficent way to get rid of the final comma
 
-                string toSend = String.Format("{0}|{1}",classificationResult,percentagesToSend);
+                string toSend = String.Format("{0}|{1}|{2}",classificationResult,percentagesToSend, "<EOF>");
 
                 sender.Send(Encoding.UTF8.GetBytes(toSend));
 

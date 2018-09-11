@@ -172,8 +172,6 @@ public class SpectrumView extends AppCompatActivity {
             startActivity(intent);
         }
         catch(Exception e){
-
-
         }
     }
 

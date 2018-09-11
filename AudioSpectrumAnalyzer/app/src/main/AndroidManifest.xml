@@ -37,8 +37,8 @@
         <activity android:name=".ShowDatabaseView" />
         <activity
             android:name=".ClassifyView"
-            android:screenOrientation="sensorPortrait"
-            ></activity>
+            android:screenOrientation="sensorPortrait" />
+        <activity android:name=".ClassifyResultsView"></activity>
     </application>
 
 </manifest>

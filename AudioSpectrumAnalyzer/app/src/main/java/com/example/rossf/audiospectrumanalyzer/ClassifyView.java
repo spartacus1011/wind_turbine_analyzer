@@ -1,6 +1,7 @@
 package com.example.rossf.audiospectrumanalyzer;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,8 +11,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ClassifyView extends AppCompatActivity {
@@ -19,6 +25,8 @@ public class ClassifyView extends AppCompatActivity {
     private TextView textViewFileToSend;
     private EditText editTextRenameFile;
     private Spinner spinnerSelectableLayers;
+
+    private TextView textViewIPAddress;
 
     private String originalID;
     private List<String> spinnerTextItems = new ArrayList<String>();
@@ -31,6 +39,9 @@ public class ClassifyView extends AppCompatActivity {
         textViewFileToSend = (TextView) findViewById(R.id.textViewFileToSend);
         editTextRenameFile = (EditText) findViewById(R.id.editTextRenameFile);
         spinnerSelectableLayers = (Spinner) findViewById(R.id.spinnerSelectableLayers);
+
+        textViewIPAddress = (TextView) findViewById(R.id.textViewIPAddress);
+        textViewIPAddress.setText(getIPAddress(true));
 
         Intent intentReceived = getIntent();
 
@@ -91,7 +102,19 @@ public class ClassifyView extends AppCompatActivity {
             return; //an error has occured when getting the local wav data
         }
         new TCPSendAudioData().execute(rawWavData, (textViewFileToSend.getText().toString().getBytes()), ("Classification|" + selectedLayer).getBytes());
-        new TCPReceiveClassification().execute();
+
+        new TCPReceiveClassification(new TCPReceiveClassification.AsyncResponse(){
+
+            @Override
+            public void processFinish(String[] output){
+                Intent intent = new Intent(ClassifyView.this, ClassifyResultsView.class);
+
+                intent.putExtra("Result", output[0]);
+                intent.putExtra("Percentages", output[1]);
+
+                startActivity(intent);
+            }
+        }).execute();
 
     }
 
@@ -103,4 +126,32 @@ public class ClassifyView extends AppCompatActivity {
 
 
     }
+
+    private static String getIPAddress(boolean useIPv4) {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
+                        String sAddr = addr.getHostAddress();
+                        //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
+                        boolean isIPv4 = sAddr.indexOf(':')<0;
+
+                        if (useIPv4) {
+                            if (isIPv4)
+                                return sAddr;
+                        } else {
+                            if (!isIPv4) {
+                                int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
+                                return delim<0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) { } // for now eat exceptions
+        return "";
+    }
+
 }

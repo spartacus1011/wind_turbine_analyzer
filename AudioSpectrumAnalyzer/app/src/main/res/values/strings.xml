@@ -2,4 +2,6 @@
     <string name="app_name">Audio Spectrum Analyzer</string>
     <string name="spectrum_view_recording_key">recordKey</string>
     <string name="classify_view_recording_key">recordKey</string>
+    <string name="classify_results_view_mainresult">mainResult</string>
+    <string name="classify_results_view_percentages">mainResult</string>
 </resources>

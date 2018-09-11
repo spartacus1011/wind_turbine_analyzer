@@ -62,11 +62,9 @@
 
         </LinearLayout>
 
-
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_margin="5dp">
 
@@ -88,26 +86,13 @@
 
         </LinearLayout>
 
-
-
-        <ScrollView
+        <TextView
+            android:id="@+id/textViewIPAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_weight=".9"
-            android:scrollbars="vertical">
-
-            <HorizontalScrollView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
-
-                <TableLayout
-                    android:id="@+id/TableClassificationScores"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"></TableLayout>
-
-            </HorizontalScrollView>
-        </ScrollView>
+            android:text="IP Address"
+            android:textColor="@color/colorText"
+            android:layout_margin="10dp"/>
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
