@@ -15,9 +15,10 @@ namespace WindTurbineAnalyzerServer.Tools
         public delegate void UpdateStatusText(string message);
 
         //should probs rename this
-        public bool? StartListening(UpdateStatusText updateStatusText, out string imagePath)
+        public bool? StartListening(UpdateStatusText updateStatusText, out string imagePath, out string ipAddressToSendBackTo)
         {
             imagePath = "";
+            ipAddressToSendBackTo = "";
             updateStatusText("Setting up for listening");
 
             byte[] bytes = new Byte[1024];
@@ -44,7 +45,6 @@ namespace WindTurbineAnalyzerServer.Tools
 
                     List<byte> AllData = new List<byte>(); //Made a list because its easier to have variable size
                     string purposeAndLayer = "";
-                    string fileInfo = "";
                     string tryString = "";
 
                     //Receiving part A
@@ -55,26 +55,18 @@ namespace WindTurbineAnalyzerServer.Tools
                     purposeAndLayer = purposeAndLayer.Replace("\0", ""); //removing padding bytes
                     purposeAndLayer = purposeAndLayer.Replace("$", ""); //Not sure where this $ comes from
 
-                    string[] purposeAndLayerSplit = purposeAndLayer.Split('|');
-                    string purpose = purposeAndLayerSplit[0];
+                    string[] info = purposeAndLayer.Split('|');
+                    ipAddressToSendBackTo = info[0];
+                    string purpose = info[1];
                     string layer = "";
                     if (purpose == "Training")
-                        layer = purposeAndLayerSplit[1];
-
-                    updateStatusText("Received part A, Awaiting part B");
-                    //Receiving part B
-                    handler = listener.Accept();
-                    int bytesCountB = handler.Receive(bytes);
-                    fileInfo += Encoding.UTF8.GetString(bytes, 0, bytesCountB);
-
-                    fileInfo = fileInfo.Replace("\u0005", ""); //removing the EOF tag
-                    fileInfo = fileInfo.Replace("\0", "");
-                    fileInfo = fileInfo.Replace("$", ""); //Not sure where this $ comes from
-
+                        layer = info[2];
+                    string fileInfo = info[3];
                     fileInfo = Path.GetInvalidFileNameChars().Aggregate(fileInfo, (current, c) => current.Replace(c.ToString(), string.Empty)); // force remove any invalid chars
 
-                    updateStatusText("Received part B, Awaiting part C");
-                    //Receiving part C
+                    //should do some kind of error check on all the info received
+                    updateStatusText("Received info. Audio file now being received");
+
                     handler = listener.Accept();
                     while (true)
                     {
@@ -96,8 +88,6 @@ namespace WindTurbineAnalyzerServer.Tools
                     {
                         imagePath = "ReceivedAudio\\" + fileInfo + ".wav";
                         File.WriteAllBytes(imagePath, AllData.ToArray());
-
-
                     }
                     else if (purpose == "Training")
                     {
@@ -105,7 +95,6 @@ namespace WindTurbineAnalyzerServer.Tools
                         if (!Directory.Exists(dir))
                             Directory.CreateDirectory(dir);
                         File.WriteAllBytes(String.Format("{0}\\{1}.wav", dir, fileInfo), AllData.ToArray());
-
                     }
                     else
                     {
@@ -130,17 +119,17 @@ namespace WindTurbineAnalyzerServer.Tools
         }
 
 
-        public bool SendClassificationResults(UpdateStatusText updateStatusText, string classificationResult, string[] classificationPercentages)
+        public bool SendClassificationResults(UpdateStatusText updateStatusText, IPAddress addressToSend ,string classificationResult, string[] classificationPercentages)
         {
             updateStatusText("Setting up for sending");
 
             byte[] bytes = new Byte[1024];
 
-            IPAddress ipAddress = new IPAddress(new byte[] { 10,132,157,227});
+            //IPAddress ipAddress = new IPAddress(new byte[] { 192,168,0,4});
 
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
+            IPEndPoint localEndPoint = new IPEndPoint(addressToSend, 11000);
 
-            Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            Socket sender = new Socket(addressToSend.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {

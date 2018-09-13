@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:WindTurbineAnalyzerServer"
         xmlns:viewModels="clr-namespace:WindTurbineAnalyzerServer.ViewModels"
         mc:Ignorable="d"
@@ -31,6 +32,6 @@
         </StackPanel>
         <Button Command="{Binding ClassifyCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Classify Images" HorizontalAlignment="Left" Margin="10,10" DockPanel.Dock="Top"></Button>
         <Grid DockPanel.Dock="Top"></Grid> <!-- just so that the last item doesnt fill -->
-        <TextBlock Text="{Binding IPAddress}" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Margin="10,10"></TextBlock>
+        <TextBlock Text="{Binding MyIPAddress}" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Margin="10,10"></TextBlock>
     </DockPanel>
 </Window>

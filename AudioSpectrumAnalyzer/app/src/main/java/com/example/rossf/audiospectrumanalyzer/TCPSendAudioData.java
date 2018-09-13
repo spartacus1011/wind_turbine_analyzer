@@ -23,11 +23,13 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
 
         String dataPurose; //either classification or training
         String dataFileInfo;
+        String ipAddress;
         byte[] dataWav;
         try{
-            dataWav = dataToSend[0];
-            dataFileInfo = new String(dataToSend[1]);
-            dataPurose = new String(dataToSend[2]);
+            ipAddress = new String(dataToSend[0]);
+            dataWav = dataToSend[1];
+            dataFileInfo = new String(dataToSend[2]);
+            dataPurose = new String(dataToSend[3]);
         }
         catch(Exception e) {
             //I need to do something here to show that an error occured with the input params
@@ -35,7 +37,6 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
         }
         int port = 11000;
 
-        String ipAddress = "10.132.102.80"; //Should make this an enterable parameter
 
         Socket socket;
 
@@ -49,22 +50,13 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataInputStream = new DataInputStream(socket.getInputStream()); //pretty sure in input serves no purpose here
 
-            //Sending Part A: Purpose
-            byte[] purposeBytes = dataPurose.getBytes("UTF-8");
-            purposeBytes = Arrays.copyOf(purposeBytes, 1024); //This should do the padding
+            //NewSending stuff
 
-            dataOutputStream.write(purposeBytes);
-            dataOutputStream.close();
+            String infoToSend = String.format("%1$s|%2$s|%3$s", getIPAddress(true),dataPurose,dataFileInfo); //care data purpose encompasses two fields, both purpose and training destination
+            byte[] infoToSendByte = infoToSend.getBytes("UTF-8");
+            infoToSendByte = Arrays.copyOf(infoToSendByte, 1024); //This should do the padding //Shouldnt be needed if we open and close the sockets
 
-
-            //Sending Part B: File Name
-            socket = new Socket(serverAddress, port); //This is where the initial connection is made
-            dataOutputStream = new DataOutputStream(socket.getOutputStream());
-
-            byte[] fileInfoBytes = dataFileInfo.getBytes("UTF-8");
-            fileInfoBytes = Arrays.copyOf(fileInfoBytes, 1024); //This should do the padding
-
-            dataOutputStream.write(fileInfoBytes);
+            dataOutputStream.write(infoToSendByte);
             dataOutputStream.close();
 
             //Sending Part C:Wav file
@@ -89,5 +81,31 @@ public class TCPSendAudioData extends AsyncTask<byte[],Void,Void> {
         return null;
     }
 
+    private static String getIPAddress(boolean useIPv4) {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
+                        String sAddr = addr.getHostAddress();
+                        //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
+                        boolean isIPv4 = sAddr.indexOf(':')<0;
+
+                        if (useIPv4) {
+                            if (isIPv4)
+                                return sAddr;
+                        } else {
+                            if (!isIPv4) {
+                                int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
+                                return delim<0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) { } // for now eat exceptions
+        return "";
+    }
 
 }

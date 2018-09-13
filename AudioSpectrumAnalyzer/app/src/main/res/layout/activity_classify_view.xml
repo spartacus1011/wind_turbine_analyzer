@@ -86,13 +86,12 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textViewIPAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="IP Address"
-            android:textColor="@color/colorText"
-            android:layout_margin="10dp"/>
+<EditText
+    android:id="@+id/editTextIpToSendTo"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorText"
+    android:layout_margin="15dp"/>
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

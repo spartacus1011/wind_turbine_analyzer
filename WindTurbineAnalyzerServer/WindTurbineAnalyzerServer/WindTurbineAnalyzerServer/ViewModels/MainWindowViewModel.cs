@@ -35,7 +35,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
         private string selectedAudioFile = "";
         public string SelectedAudioFile { get { return selectedAudioFile; } set { selectedAudioFile = value; RaisePropertyChangedEvent("SelectedAudioFile"); RaisePropertyChangedEvent("HasAudioToClassify"); } }
 
-        public string IPAddress{ get; set; } //its ok to not have the private one as the IP address wont change between sessions
+        public string MyIPAddress{ get; set; } //its ok to not have the private one as the IP address wont change between sessions
 
         private int sessionReceivedCount = 0; 
         public string SessionReceivedCountString { get { return "Files receiced this session: " + sessionReceivedCount; } }
@@ -51,8 +51,8 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[1];
-            IPAddress = ipAddress.ToString();
-            
+            MyIPAddress = ipAddress.ToString();
+
             //set up matlab
             matlab.Execute(@"cd D:\RMITUNI\allwindturbineanalyzer\WindTurbineAnalyser"); //everything will be done from this directory
 
@@ -81,8 +81,8 @@ namespace WindTurbineAnalyzerServer.ViewModels
         private string pathForClassification;
 
         private bool? startTCPListeningAction()
-        { 
-            bool? classify = tcp.StartListening(UpdateStatusText, out string path);
+        {
+            bool? classify = tcp.StartListening(UpdateStatusText, out string path, out string ipAddressToSendBackTo);
             pathForClassification = path;
             TCPisInactive = false; //this might need to be moved
             PopulateReceivedList();
@@ -96,14 +96,15 @@ namespace WindTurbineAnalyzerServer.ViewModels
                 //we then need to classify images 
                 object[] result = Classify("Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
 
-                tcp.SendClassificationResults(UpdateStatusText, result[0].ToString(), new string[] { result[1].ToString(), result[2].ToString() });
+                IPAddress addressToSend = IPAddress.Parse(ipAddressToSendBackTo);
+
+                tcp.SendClassificationResults(UpdateStatusText, addressToSend,result[0].ToString(), new string[] { result[1].ToString(), result[2].ToString() });
                 //and send the results back
             }
             //if false we chill the data was just for training, if null there was an error
 
-
             TCPisInactive = true;
-
+            StatusText = "File received";
             return classify;
         }
 

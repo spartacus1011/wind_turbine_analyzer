@@ -26,7 +26,7 @@ public class ClassifyView extends AppCompatActivity {
     private EditText editTextRenameFile;
     private Spinner spinnerSelectableLayers;
 
-    private TextView textViewIPAddress;
+    private TextView editTextIpToSendTo;
 
     private String originalID;
     private List<String> spinnerTextItems = new ArrayList<String>();
@@ -40,9 +40,6 @@ public class ClassifyView extends AppCompatActivity {
         editTextRenameFile = (EditText) findViewById(R.id.editTextRenameFile);
         spinnerSelectableLayers = (Spinner) findViewById(R.id.spinnerSelectableLayers);
 
-        textViewIPAddress = (TextView) findViewById(R.id.textViewIPAddress);
-        textViewIPAddress.setText(getIPAddress(true));
-
         Intent intentReceived = getIntent();
 
         originalID = intentReceived.getStringExtra(getString(R.string.classify_view_recording_key));
@@ -50,6 +47,7 @@ public class ClassifyView extends AppCompatActivity {
         textViewFileToSend.setText(originalID);
         editTextRenameFile.setHint(originalID);
 
+        editTextIpToSendTo = (EditText) findViewById(R.id.editTextIpToSendTo);
 
         spinnerTextItems.add("WindTurbine");
         spinnerTextItems.add("Wind");
@@ -101,7 +99,12 @@ public class ClassifyView extends AppCompatActivity {
         {
             return; //an error has occured when getting the local wav data
         }
-        new TCPSendAudioData().execute(rawWavData, (textViewFileToSend.getText().toString().getBytes()), ("Classification|" + selectedLayer).getBytes());
+
+
+        new TCPSendAudioData().execute(editTextIpToSendTo.getText().toString().getBytes(),
+                rawWavData,
+                (textViewFileToSend.getText().toString().getBytes()),
+                ("Classification|" + selectedLayer).getBytes());
 
         new TCPReceiveClassification(new TCPReceiveClassification.AsyncResponse(){
 

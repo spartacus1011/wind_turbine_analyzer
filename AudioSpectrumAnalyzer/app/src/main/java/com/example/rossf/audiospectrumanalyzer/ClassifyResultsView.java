@@ -29,8 +29,8 @@ public class ClassifyResultsView extends AppCompatActivity {
         textViewResult.setText("Result: " + received.getStringExtra("Result"));
 
         if(percentages.length >= 2) {
-            textViewWindTurbinePercent.setText("Wind turbine percentage: " + (Float.parseFloat(percentages[0])*100));
-            textViewWindPercent.setText("Wind percentage: " + (Float.parseFloat(percentages[1])*100));
+            textViewWindTurbinePercent.setText("Wind turbine percentage: " + (Float.parseFloat(percentages[1])*100));
+            textViewWindPercent.setText("Wind percentage: " + (Float.parseFloat(percentages[0])*100));
         }
     }
 }
