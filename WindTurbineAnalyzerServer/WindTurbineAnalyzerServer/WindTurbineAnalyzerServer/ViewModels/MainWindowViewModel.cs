@@ -33,7 +33,18 @@ namespace WindTurbineAnalyzerServer.ViewModels
         private List<string> audioFiles = new List<string>();
         public ObservableCollection<string> AudioFiles { get { return new ObservableCollection<string>(audioFiles); } } //years later, im still not sure that this is the best approach
         private string selectedAudioFile = "";
-        public string SelectedAudioFile { get { return selectedAudioFile; } set { selectedAudioFile = value; RaisePropertyChangedEvent("SelectedAudioFile"); RaisePropertyChangedEvent("HasAudioToClassify"); } }
+        public string SelectedAudioFile { get { return selectedAudioFile; } set {
+                selectedAudioFile = value;
+                RaisePropertyChangedEvent("SelectedAudioFile");
+                RaisePropertyChangedEvent("HasAudioToClassify");
+                string imagePath = "Classification//" + Path.GetFileNameWithoutExtension(value);
+                photoFilePaths = Directory.GetFiles(imagePath).ToList().Select(s => new FileInfo(s).FullName).ToList();
+
+                RaisePropertyChangedEvent("PhotoFilePaths");
+            } }
+
+        private List<string> photoFilePaths = new List<string>();
+        public ObservableCollection<string> PhotoFilePaths { get { return new ObservableCollection<string>(photoFilePaths); } }
 
         public string MyIPAddress{ get; set; } //its ok to not have the private one as the IP address wont change between sessions
 
@@ -69,12 +80,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
         {
             if (TCPisInactive)
             {
-
-                //Task<bool?> asyncListen = new Task<bool?>(startTCPListeningAction);
-                //asyncListen.Start(); //Need to google how to give the task a callback function
-
                 StartSTATask(startTCPListeningAction);
-                
             }
         }
 
