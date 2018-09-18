@@ -38,13 +38,30 @@ namespace WindTurbineAnalyzerServer.ViewModels
                 RaisePropertyChangedEvent("SelectedAudioFile");
                 RaisePropertyChangedEvent("HasAudioToClassify");
                 string imagePath = "Classification//" + Path.GetFileNameWithoutExtension(value);
-                photoFilePaths = Directory.GetFiles(imagePath).ToList().Select(s => new FileInfo(s).FullName).ToList();
+                if (Directory.Exists(imagePath))
+                {
+                    int count = 0;
+                    photoFilePaths.Clear();
+                    foreach (var thing in Directory.GetFiles(imagePath))
+                    {
+                        photoFilePaths.Add( new ImageViewerViewModel
+                        {
+                            FilePath = new FileInfo(thing).FullName,
+                            ImageNumber = count++,
+                            ImageName = thing
+                        });
+                    }
 
+                    //photoFilePaths = Directory.GetFiles(imagePath).ToList().Select(s => new FileInfo(s).FullName).ToList(); //I could bear to see this beautiful linq statement go so just commenting it out
+                }
+                else
+                { //Throw in some no images found message 
+                }
                 RaisePropertyChangedEvent("PhotoFilePaths");
             } }
 
-        private List<string> photoFilePaths = new List<string>();
-        public ObservableCollection<string> PhotoFilePaths { get { return new ObservableCollection<string>(photoFilePaths); } }
+        private List<ImageViewerViewModel> photoFilePaths = new List<ImageViewerViewModel>();
+        public ObservableCollection<ImageViewerViewModel> PhotoFilePaths { get { return new ObservableCollection<ImageViewerViewModel>(photoFilePaths); } }
 
         public string MyIPAddress{ get; set; } //its ok to not have the private one as the IP address wont change between sessions
 
@@ -126,6 +143,9 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
         private void CreateClassificationImages(string pathToAudio,string pathToOutputImages)
         {
+            photoFilePaths = new List<ImageViewerViewModel>();
+            RaisePropertyChangedEvent("PhotoFilePaths");
+
             StatusText = "Creating classification images...";
             object result = null;
             try

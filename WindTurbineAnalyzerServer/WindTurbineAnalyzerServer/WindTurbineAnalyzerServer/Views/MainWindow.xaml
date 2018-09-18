@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WindTurbineAnalyzerServer"
         xmlns:viewModels="clr-namespace:WindTurbineAnalyzerServer.ViewModels"
         mc:Ignorable="d"
-        Title="Wind Turbine Analyzer Server" Height="800" Width="1000">
+        Title="Wind Turbine Analyzer Server" Height="600" Width="1000">
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FF1E1E1E" Offset="0"/>
@@ -20,7 +20,7 @@
     </Window.DataContext>
 
     <DockPanel>
-        <TextBlock Text="Wind Turbine Analyzer Server" FontSize="30" HorizontalAlignment="Center" Margin="10,10" DockPanel.Dock="Top" Foreground="White"></TextBlock>
+        <TextBlock Text="Wind Turbine Analyzer Server" FontSize="36" HorizontalAlignment="Center" Margin="10,10" DockPanel.Dock="Top" Foreground="White"></TextBlock>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <TextBlock Text="Current Status:" FontSize="20" Margin="10,10" Foreground="White"></TextBlock>
             <TextBlock Text="{Binding StatusText}" FontSize="20" Margin="10,10" Foreground="White"></TextBlock>
@@ -46,7 +46,10 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
-                            <Image Source="{Binding}" Height="150" Width="150" Margin="2,0"></Image>
+                            <StackPanel>
+                                <TextBlock Text="{Binding ImageNumber}" Foreground="White" HorizontalAlignment="Center"></TextBlock>
+                                <Image Source="{Binding FilePath}" Height="150" Width="150" Margin="2,0"></Image>
+                            </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

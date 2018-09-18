@@ -90,6 +90,7 @@
     <Compile Include="Tools\ObservableObject.cs" />
     <Compile Include="Tools\TCPSocketSyncronous.cs" />
     <Compile Include="ViewModels\ClassificationResultsViewModel.cs" />
+    <Compile Include="ViewModels\ImageViewerViewModel.cs" />
     <Compile Include="Views\ClassificationResultsView.xaml.cs">
       <DependentUpon>ClassificationResultsView.xaml</DependentUpon>
     </Compile>

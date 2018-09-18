@@ -4,6 +4,7 @@ y = 0;
 
 %Clearing old classification Images
 filePattern = fullfile(imageLocation, '*.bmp'); % Change to whatever pattern you need.
+[fPath, fName, fExt] = fileparts(imageLocation);
 theFiles = dir(filePattern);
 for k = 1 : length(theFiles)
   baseFileName = theFiles(k).name;
@@ -38,7 +39,7 @@ while currentPos < (roundedLength - (maxSeconds*fs))
     caxis([-90 -60]); %Although the cbar is off, this still affects the scale
     colorbar('off');
     img = frame2im(getframe(gca));
-    filename = fullfile(strcat(imageLocation,'\\Image',num2str(currentSegment),'.bmp'));
+    filename = fullfile(strcat(imageLocation,'\\', fName,num2str(currentSegment),'.bmp'));
     imwrite(img,filename);
     
     currentPos= currentPos + dataLength;
