@@ -22,21 +22,17 @@ confidenceScores = scores;
 %Pretty verbose, but will work for now
 windCount = sum(YPred(:) == 'Wind');
 windTurbineCount = sum(YPred(:) == 'Wind Turbine');
-otherCount = sum(YPred(:) == 'Other');
+otherCount = sim(YPred(:) == 'Other');
 
 totNumber = length(YPred);
 
 %fprintf('wind percentage = %f \n',windCount/totNumber);
 %fprintf('wind turbine percentage = %f \n',windTurbineCount/totNumber);
 
-if windCount > windTurbineCount && windCount > otherCount
-    result = 'Wind';
-elseif windTurbineCount > windCount && windTurbineCount > otherCount
+if windCount < windTurbineCount && windCount < otherCount
     result = 'Wind Turbine';
-elseif otherCount > windCount && otherCount > windTurbineCount
-    result = 'Other';
-else
-    result = 'Error';
+elseif windTurbineCount < windCount && windTurbineCount 
+    result = 'Wind';
 end
 
 windPercent = windCount/totNumber;

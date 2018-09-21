@@ -169,7 +169,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
             object result = null;
             try
             {
-                matlab.Feval("Classify", 4, out result, selectedAudioPath);
+                matlab.Feval("Classify", 5, out result, selectedAudioPath);
             }
             catch (Exception e)
             {
@@ -180,16 +180,16 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
             if (res != null)
             {
-                CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (float[,])res[3]);
+                CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (double)res[3],(float[,])res[4]);
             }
             return res;
         }
 
-        private void CreateClassificationResultsView(string result, double windPercent, double windTurbinePercent, float[,] confidenceScores)
+        private void CreateClassificationResultsView(string result, double windPercent, double windTurbinePercent, double otherPercent,float[,] confidenceScores)
         {
             //its ok to do stuff in this manner it will only be a one way interaction between the views
             ClassificationResultsView classificationResultsView = new ClassificationResultsView();
-            classificationResultsView.DataContext = new ClassificationResultsViewModel(result, windPercent, windTurbinePercent, confidenceScores);
+            classificationResultsView.DataContext = new ClassificationResultsViewModel(result, windPercent, windTurbinePercent, otherPercent,confidenceScores);
 
             classificationResultsView.Show(); //This is in a new thread
             

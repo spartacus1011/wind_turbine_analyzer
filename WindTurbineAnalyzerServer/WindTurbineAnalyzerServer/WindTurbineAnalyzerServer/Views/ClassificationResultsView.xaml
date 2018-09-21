@@ -12,12 +12,15 @@
             <TextBlock Text="{Binding Result}" FontSize="18" Margin="0,10"></TextBlock>
 
         </StackPanel>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Margin="5">
             <TextBlock Text="Wind Percent: "></TextBlock>
             <TextBlock Text="{Binding WindPercentString}"></TextBlock>
             <TextBlock Text="   ||||   "></TextBlock>
             <TextBlock Text="Wind Turbine Percent: "></TextBlock>
             <TextBlock Text="{Binding WindTurbinePercentString}"></TextBlock>
+            <TextBlock Text="   ||||   "></TextBlock>
+            <TextBlock Text="Other Percent: "></TextBlock>
+            <TextBlock Text="{Binding OtherPercentString}"></TextBlock>
         </StackPanel>
 
         <DataGrid ItemsSource="{Binding ConfidenceScores}" IsReadOnly="True"></DataGrid>
