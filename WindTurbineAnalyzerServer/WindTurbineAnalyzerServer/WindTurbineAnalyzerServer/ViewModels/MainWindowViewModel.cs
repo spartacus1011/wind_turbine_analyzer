@@ -21,6 +21,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
         public ICommand CreateClassificationImagesCommand { get { return new DelegateCommand(CreateClassificationImages); } }
         public ICommand StartTrainingCommand { get { return new DelegateCommand(StartTrainingNetwork); } }
         public ICommand ClassifyCommand { get { return new DelegateCommand(Classify); } }
+        public ICommand RefreshAudioListCommand { get { return new DelegateCommand(PopulateReceivedList); } }
 
         private string statusText = "Good morning";
         public string StatusText { get { return statusText; } set { statusText = value; RaisePropertyChangedEvent("StatusText"); } }

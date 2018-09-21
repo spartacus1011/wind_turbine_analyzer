@@ -14,7 +14,7 @@ for k = 1 : length(theFiles)
 end
 
 %Creating classification Images
-minSeconds = 2;
+minSeconds = 5;
 maxSeconds = 5;  
 
 [signal, fs] = audioread(fullfile(audioFileLocation));

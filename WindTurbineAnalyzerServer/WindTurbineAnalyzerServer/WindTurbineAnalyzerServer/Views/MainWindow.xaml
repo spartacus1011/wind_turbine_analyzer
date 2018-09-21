@@ -31,10 +31,9 @@
         </StackPanel>
         <Button Command="{Binding StartTrainingCommand}" IsEnabled="{Binding NetworkIsTraining}" Content="Re-Train Network" HorizontalAlignment="Left" Margin="10,10" DockPanel.Dock="Top"></Button>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <Button Command="{Binding CreateClassificationImagesCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Classify selected file" HorizontalAlignment="Left" Margin="10,10"></Button>
-            <ListView ItemsSource="{Binding AudioFiles}" HorizontalAlignment="Stretch" SelectedItem="{Binding SelectedAudioFile}" MaxHeight="100">
-
-            </ListView>
+            <Button Command="{Binding CreateClassificationImagesCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Create Classification Images" HorizontalAlignment="Left" Margin="10,10" Height="22" VerticalAlignment="Top"></Button>
+            <ListView ItemsSource="{Binding AudioFiles}" HorizontalAlignment="Stretch" SelectedItem="{Binding SelectedAudioFile}" MaxHeight="100">            </ListView>
+            <Button Command="{Binding RefreshAudioListCommand}" Content="Refresh Audio List" Margin="10" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top"></Button>
         </StackPanel>
         <Button Command="{Binding ClassifyCommand}" IsEnabled="{Binding HasAudioToClassify}" Content="Classify Images" HorizontalAlignment="Left" Margin="10,10" DockPanel.Dock="Top"></Button>
         <Grid DockPanel.Dock="Top"></Grid>
