@@ -12,6 +12,7 @@ public class ClassifyResultsView extends AppCompatActivity {
     TextView textViewResult;
     TextView textViewWindTurbinePercent;
     TextView textViewWindPercent;
+    TextView textViewOtherPercent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class ClassifyResultsView extends AppCompatActivity {
         textViewResult = (TextView) findViewById(R.id.textViewResult);
         textViewWindTurbinePercent = (TextView) findViewById(R.id.textViewWindTurbinePercent);
         textViewWindPercent = (TextView) findViewById(R.id.textViewWindPercent);
+        textViewOtherPercent = (TextView) findViewById(R.id.textViewOtherPercent);
 
         Intent received = getIntent();
 
@@ -28,9 +30,10 @@ public class ClassifyResultsView extends AppCompatActivity {
 
         textViewResult.setText("Result: " + received.getStringExtra("Result"));
 
-        if(percentages.length >= 2) {
+        if(percentages.length >= 3) {
             textViewWindTurbinePercent.setText("Wind turbine percentage: " + (Float.parseFloat(percentages[1])*100));
             textViewWindPercent.setText("Wind percentage: " + (Float.parseFloat(percentages[0])*100));
+            textViewOtherPercent.setText("Other percentage: " + (Float.parseFloat(percentages[2])*100));
         }
     }
 }

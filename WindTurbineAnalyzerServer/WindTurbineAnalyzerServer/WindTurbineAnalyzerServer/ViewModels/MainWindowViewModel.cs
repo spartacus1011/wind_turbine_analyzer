@@ -38,6 +38,11 @@ namespace WindTurbineAnalyzerServer.ViewModels
                 selectedAudioFile = value;
                 RaisePropertyChangedEvent("SelectedAudioFile");
                 RaisePropertyChangedEvent("HasAudioToClassify");
+                if (value == "")
+                {
+                    photoFilePaths.Clear();
+                    RaisePropertyChangedEvent("PhotoFilePaths");
+                }
                 string imagePath = "Classification//" + Path.GetFileNameWithoutExtension(value);
                 if (Directory.Exists(imagePath))
                 {
@@ -122,7 +127,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
                 IPAddress addressToSend = IPAddress.Parse(ipAddressToSendBackTo);
 
-                tcp.SendClassificationResults(UpdateStatusText, addressToSend,result[0].ToString(), new string[] { result[1].ToString(), result[2].ToString() });
+                tcp.SendClassificationResults(UpdateStatusText, addressToSend,result[0].ToString(), new string[] { result[1].ToString(), result[2].ToString(), result[3].ToString() });
                 //and send the results back
             }
             //if false we chill the data was just for training, if null there was an error
@@ -146,11 +151,27 @@ namespace WindTurbineAnalyzerServer.ViewModels
         {
             photoFilePaths = new List<ImageViewerViewModel>();
             RaisePropertyChangedEvent("PhotoFilePaths");
+            selectedAudioFile = "";
+            SelectedAudioFile = "";
+            RaisePropertyChangedEvent("SelectedAudioFile");
+
+            Thread.Sleep(1000);
+            GC.Collect(); //not keen on this, but if its the only way...
+            GC.WaitForPendingFinalizers();
 
             StatusText = "Creating classification images...";
             object result = null;
             try
             {
+                if (Directory.Exists(pathToOutputImages))
+                {
+                    Directory.Delete(pathToOutputImages, true);
+                    //foreach (FileInfo file in new DirectoryInfo(pathToOutputImages).GetFiles())
+                    //{
+                    //    file.Delete();
+                    //}
+                }
+
                 Directory.CreateDirectory(pathToOutputImages);
                 matlab.Feval("CreateClassificationImages", 1, out result, pathToAudio, pathToOutputImages, window, noverlap, nfft);
             }

@@ -100,8 +100,11 @@ public class ClassifyView extends AppCompatActivity {
             return; //an error has occured when getting the local wav data
         }
 
+        String ipToSend = editTextIpToSendTo.getText().toString();
+        if(ipToSend.isEmpty())
+            ipToSend = "10.132.96.97";
 
-        new TCPSendAudioData().execute(editTextIpToSendTo.getText().toString().getBytes(),
+        new TCPSendAudioData().execute(ipToSend.getBytes(),
                 rawWavData,
                 (textViewFileToSend.getText().toString().getBytes()),
                 ("Classification|" + selectedLayer).getBytes());
