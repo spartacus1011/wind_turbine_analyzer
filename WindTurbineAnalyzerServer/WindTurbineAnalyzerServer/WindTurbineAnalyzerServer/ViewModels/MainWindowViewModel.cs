@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.Windows.Threading;
+using WindTurbineAnalyzerServer.Models;
 
 namespace WindTurbineAnalyzerServer.ViewModels
 {
@@ -80,6 +81,12 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
         public MainWindowViewModel()
         {
+            //DBTesting
+            DataStore ds = new DataStore("DataBase.db");
+            RecordingInfo ri = new RecordingInfo() { IDGUID = Guid.NewGuid(), RecordingName = "Test", DateRecording = DateTime.Now, HasImages = false, HasBeenClassified = false };
+            ds.AddRecordingInfo(ri);
+            //EndDBTesting
+
             SelectedAudioFile = "";
             //Consider showing a splash or something while this is happening
 
