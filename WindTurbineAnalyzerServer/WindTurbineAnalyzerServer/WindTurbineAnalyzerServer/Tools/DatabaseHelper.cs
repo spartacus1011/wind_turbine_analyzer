@@ -114,7 +114,7 @@ namespace WindTurbineAnalyzerServer.Tools
             }
         }
 
-        private static void AddMultipleItems(SQLiteConnection connection, string tableName, string tableData, IEnumerable<IEnumerable<object>> allItems) //an enumberable of an enumerable kinda seems like a bad idea...
+        public static void AddMultipleItems(SQLiteConnection connection, string tableName, string tableData, IEnumerable<IEnumerable<object>> allItems) //an enumberable of an enumerable kinda seems like a bad idea...
         {
             //the order of the items in all items is important!!! it must match the order of things in table data
             //tableData more or less means columns

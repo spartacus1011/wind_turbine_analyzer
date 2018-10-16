@@ -12,6 +12,7 @@ namespace WindTurbineAnalyzerServer.Models
         public Guid IDGUID { get; set; }
         public string RecordingName { get; set; }
         public DateTime DateRecording { get; set; }
+        public DateTime DateClassification { get; set; }
         public bool HasImages { get; set; }
         public int NumberOfImages { get; set; }
         public bool HasBeenClassified { get; set; }

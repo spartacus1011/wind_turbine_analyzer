@@ -27,6 +27,8 @@ namespace WindTurbineAnalyzerServer.ViewModels
         private string statusText = "Good morning";
         public string StatusText { get { return statusText; } set { statusText = value; RaisePropertyChangedEvent("StatusText"); } }
 
+        DataStore ds = new DataStore("DataBase.db"); //Load the DB
+
         public bool HasAudioToClassify { get { return AudioFiles.Any() && SelectedAudioFile != ""; } }
 
         private bool tcpisInactive = true;
@@ -81,24 +83,22 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
         public MainWindowViewModel()
         {
-            //DBTesting
-            DataStore ds = new DataStore("DataBase.db");
-            RecordingInfo ri = new RecordingInfo() { IDGUID = Guid.NewGuid(), RecordingName = "Test", DateRecording = DateTime.Now, HasImages = false, HasBeenClassified = false };
-            ds.AddRecordingInfo(ri);
-            //EndDBTesting
-
             SelectedAudioFile = "";
             //Consider showing a splash or something while this is happening
 
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[1];
-            MyIPAddress = ipAddress.ToString();
+            IPAddress[] ipAddressList = ipHostInfo.AddressList;
 
+            MyIPAddress = "";
+
+            for (int i = 0; i < ipAddressList.Length; i++)
+            {
+                MyIPAddress += " Address: " + ipAddressList[i] + " | ";
+            }
             //set up matlab
             matlab.Execute(@"cd D:\RMITUNI\allwindturbineanalyzer\WindTurbineAnalyser"); //everything will be done from this directory
 
             PopulateReceivedList();
-
         }
 
         public void UpdateStatusText(string message) {
@@ -128,7 +128,7 @@ namespace WindTurbineAnalyzerServer.ViewModels
             if (classify == true)
             {
                 CreateClassificationImages(pathForClassification, "Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
-
+                SelectedAudioFile = path;
                 //we then need to classify images 
                 object[] result = Classify("Classification//" + Path.GetFileNameWithoutExtension(pathForClassification));
 
@@ -192,12 +192,13 @@ namespace WindTurbineAnalyzerServer.ViewModels
             StatusText = "Classification images have been created in path: " + pathToOutputImages;
         }
 
-        private object[] Classify(string selectedAudioPath) {
-
+        private object[] Classify(string selectedAudioImagesPath)
+        {
+            StatusText = "Currently classyifying " + Path.GetFileNameWithoutExtension(selectedAudioFile);
             object result = null;
             try
             {
-                matlab.Feval("Classify", 5, out result, selectedAudioPath);
+                matlab.Feval("Classify", 5, out result, selectedAudioImagesPath);
             }
             catch (Exception e)
             {
@@ -208,9 +209,44 @@ namespace WindTurbineAnalyzerServer.ViewModels
 
             if (res != null)
             {
-                CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (double)res[3],(float[,])res[4]);
+                CreateClassificationResultsView((string)res[0], (double)res[1], (double)res[2], (double)res[3], (float[,])res[4]);
+
+                string resultString = (string)res[0];
+                if (resultString == "Wind Turbine") resultString = "WindTurbine"; //this is nasty, but it will do
+                Enum.TryParse(resultString, out ClassificationResult cr);
+
+                Guid recordingGuid = Guid.NewGuid();
+                //done the old fashion way for exception finding
+                RecordingInfo ri = new RecordingInfo();
+                ri.IDGUID = recordingGuid;
+                ri.RecordingName = Path.GetFileNameWithoutExtension(selectedAudioFile);
+                ri.DateRecording = File.GetCreationTime(selectedAudioFile);
+                ri.DateClassification = DateTime.Now;
+                ri.HasImages = true; //this is a given, but not how this should actually work
+                ri.NumberOfImages = new DirectoryInfo(selectedAudioImagesPath).GetFiles().Length;
+                ri.HasBeenClassified = true; //this is a given considered we got to this point
+                ri.classificationResult = cr;
+                ri.WindPercent = (double)res[1];
+                ri.WindTurbinePercent = (double)res[2];
+                ri.OtherPercent = (double)res[3];
+                ds.AddRecordingInfo(ri);
+
+                float[,] classValues = (float[,])res[4];
+                List<RecordingClassificationImageResult> allClassificationResults = new List<RecordingClassificationImageResult>();
+
+                for (int i = 0; i < classValues.Length/3; i++)
+                {
+                    RecordingClassificationImageResult rcir = new RecordingClassificationImageResult();
+                    rcir.IDGUID = recordingGuid;
+                    rcir.ImageNumber = i;
+                    rcir.OtherScore = classValues[i, 0];
+                    rcir.WindScore = classValues[i, 1];
+                    rcir.WindTurbineScore = classValues[i, 2];
+                    allClassificationResults.Add(rcir);
+                }
+                ds.AddRecordingClassificationResults(allClassificationResults);
             }
-            return res;
+                return res;
         }
 
         private void CreateClassificationResultsView(string result, double windPercent, double windTurbinePercent, double otherPercent,float[,] confidenceScores)
@@ -223,8 +259,8 @@ namespace WindTurbineAnalyzerServer.ViewModels
             
         }
 
-        private void Classify() {
-
+        private void Classify()
+        {
             Classify("Classification//" + Path.GetFileNameWithoutExtension(selectedAudioFile));
         }
 

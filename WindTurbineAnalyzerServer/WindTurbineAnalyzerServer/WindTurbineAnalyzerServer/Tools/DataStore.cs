@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
@@ -69,7 +70,11 @@ namespace WindTurbineAnalyzerServer.Tools
             DatabaseHelper.DisconnectFromDatabase(connection);
         }
 
-        //This can be further simplified. Possibly as an update to database helper
+        /// <summary>
+        /// This needs to look through the rows to see if that file already exists and remove and replace it
+        /// should also join recording info and results to the same function
+        /// </summary>
+        /// <param name="recordingInfo"></param>
         public void AddRecordingInfo(RecordingInfo recordingInfo)
         {
             List<object> recordingInfoListObj = new List<object>();
@@ -88,16 +93,26 @@ namespace WindTurbineAnalyzerServer.Tools
             DatabaseHelper.DeleteItem(connection, RecordingInfoTableName, nameof(recordingInfo.IDGUID), recordingInfo.IDGUID.ToString());
         }
 
-        public void AddRecordingClassificationResults(RecordingClassificationImageResult rcir)
+        public void AddRecordingClassificationResults(List<RecordingClassificationImageResult> rcirList)
         {
-            List<object> rcirListObj = new List<object>();
+            //im sure this is bad
+            List<List<object>> rcirListObj = new List<List<object>>();
 
-            foreach (PropertyInfo propertyInfo in rcir.GetType().GetProperties())
+            foreach (RecordingClassificationImageResult rcir in rcirList)
             {
-                rcirListObj.Add(propertyInfo.GetValue(rcir, null));
+                List<object> rcirObj = new List<object>();
+                foreach (PropertyInfo propertyInfo in rcir.GetType().GetProperties())
+                {
+                    rcirObj.Add(propertyInfo.GetValue(rcir, null));
+                }
+                rcirListObj.Add(rcirObj);
             }
+            DatabaseHelper.AddMultipleItems(connection, RecordingClassificationImageResultTableName, RecordingClassificationImageResultTableData, rcirListObj);
+        }
 
-            DatabaseHelper.AddItem(connection, RecordingClassificationImageResultTableName, RecordingClassificationImageResultTableData, rcirListObj);
+        public void SyncRecordingInfo()
+        {
+            
         }
 
     }
